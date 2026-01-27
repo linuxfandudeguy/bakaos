@@ -1,0 +1,7 @@
+FROM fedora:43
+RUN dnf install -y wget
+COPY busybox-1.37.0-3.fc43.x86_64.rpm /root/
+RUN rpm -ivh /root/busybox-1.37.0-3.fc43.x86_64.rpm && rm -f /root/busybox-1.37.0-3.fc43.x86_64.rpm
+COPY target/release/bakashell /usr/local/bin/bakashell
+RUN chmod +x /usr/local/bin/bakashell
+CMD ["/usr/local/bin/bakashell"]
