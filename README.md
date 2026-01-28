@@ -22,7 +22,7 @@ git clone https://github.com/linuxfandudeguy/bakaos
 make run-os
 ```
 ## Customization
-You can install crates to add as addons by adding it as a line under `dependencies` in `Cargo.toml`, which can be imported into the shell. (`src/main.rs`)
+You can install crates to add as addons by adding it as a line under `dependencies` in `Cargo.toml`, which can be imported into the shell by modifying the code in `src/main.rs`. 
 
 ```toml
 [package]
