@@ -22,12 +22,12 @@ run: build
 # -------- docker image --------
 .PHONY: docker
 docker: build
-	docker build -t $(IMAGE) .
+	sudo docker build -t $(IMAGE) .
 
 # -------- run docker --------
-.PHONY: docker-run
-docker-run: docker
-	docker run -it --rm $(IMAGE)
+.PHONY: run-os
+run-os: docker
+	sudo docker run -it --rm $(IMAGE)
 
 # -------- clean --------
 .PHONY: clean
