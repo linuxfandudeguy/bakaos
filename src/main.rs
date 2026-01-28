@@ -4,6 +4,7 @@ use rustyline::Editor;
 
 use std::collections::HashMap;
 use std::env;
+use std::io::{self, Write};
 
 mod pipes;
 use pipes::run_pipeline;
@@ -114,6 +115,11 @@ fn main() {
                         if admin_mode { "enabled" } else { "disabled" }
                     );
                     continue;
+                } else if line == "clear" {
+                    // Clear screen
+                   print!("\x1B[2J\x1B[H"); // clear screen + move cursor to top-left
+                   io::stdout().flush().unwrap(); // flush to terminal
+                    continue;
                 }
 
                 // Pipeline support
@@ -123,7 +129,8 @@ fn main() {
                         .map(|cmd| {
                             let parts: Vec<&str> = cmd.trim().split_whitespace().collect();
                             let parts = expand_alias(parts, &aliases);
-                            let parts: Vec<String> = parts.into_iter().map(|s| s.to_string()).collect();
+                            let parts: Vec<String> =
+                                parts.into_iter().map(|s| s.to_string()).collect();
                             expand_globs(parts)
                         })
                         .collect();
