@@ -32,7 +32,8 @@ edition = "2021" # Dont mod this line
 
 [dependencies]
 rustyline = "17.0.2" # Dont mod this line 
-                     # insert a package here
+duct = "1.1.1"  # Dont mod this line
+# insert a package here
 ```
 
 You can also remove `--rm` from the command in the `run-os` function in the Makefile to have the OS be persistent, but it eats at disk storage.
