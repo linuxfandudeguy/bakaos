@@ -8,7 +8,11 @@ use std::env;
 mod pipes;
 use pipes::run_pipeline;
 
+mod globb;
+use globb::expand_globs;
+
 fn run_command(cmd: &str, args: &[&str], busybox_path: &str, admin_mode: bool) {
+    // Try BusyBox first
     let status = std::process::Command::new(busybox_path)
         .arg(cmd)
         .args(args)
@@ -21,6 +25,7 @@ fn run_command(cmd: &str, args: &[&str], busybox_path: &str, admin_mode: bool) {
         Ok(s) if s.success() => return,
         _ => {
             if admin_mode {
+                // Admin fallback to PATH binaries
                 if let Err(e) = std::process::Command::new(cmd)
                     .args(args)
                     .stdin(std::process::Stdio::inherit())
@@ -87,6 +92,7 @@ fn main() {
                 }
                 rl.add_history_entry(line).ok();
 
+                // Builtins
                 if line == "exit" {
                     break;
                 } else if line.starts_with("cd") {
@@ -110,19 +116,28 @@ fn main() {
                     continue;
                 }
 
+                // Pipeline support
                 if line.contains('|') {
                     let pipeline: Vec<Vec<String>> = line
                         .split('|')
                         .map(|cmd| {
                             let parts: Vec<&str> = cmd.trim().split_whitespace().collect();
-                            expand_alias(parts, &aliases)
+                            let parts = expand_alias(parts, &aliases);
+                            let parts: Vec<String> = parts.into_iter().map(|s| s.to_string()).collect();
+                            expand_globs(parts)
                         })
                         .collect();
 
                     run_pipeline(pipeline, busybox_path, admin_mode);
                 } else {
+                    // Single command
                     let parts: Vec<&str> = line.split_whitespace().collect();
                     let parts = expand_alias(parts, &aliases);
+                    let mut parts: Vec<String> = parts.into_iter().map(|s| s.to_string()).collect();
+
+                    // Glob expansion
+                    parts = expand_globs(parts);
+
                     let cmd = &parts[0];
                     let args: Vec<&str> = parts[1..].iter().map(|s| s.as_str()).collect();
                     run_command(cmd, &args, busybox_path, admin_mode);

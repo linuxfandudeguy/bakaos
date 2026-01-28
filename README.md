@@ -32,7 +32,8 @@ edition = "2021" # Dont mod this line
 
 [dependencies]
 rustyline = "17.0.2" # Dont mod this line 
-duct = "1.1.1"  # Dont mod this line
+duct = "1.1.1" # Dont mod this line
+ glob = "0.3.3" # Dont mod this line
 # insert a package here
 ```
 
