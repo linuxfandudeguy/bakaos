@@ -42,6 +42,72 @@ You can also remove `--rm` from the command in the `run-os` function in the Make
 run-os: docker
 	sudo docker run -it --rm $(IMAGE)
 ```
+## Installing packages 
+
+> you can only use your installed packages in admin mode :(
+
+To install any package, do the following:
+
+1. Enter admin mode
+
+Run `admin` in the shell to follow these instructions, or else it wont work.
+```sh
+バカ:/$ admin
+Admin mode enabled
+バカ(admin)/$
+```
+2. Find the rpm for the package you want to install
+
+Go onto an RPM mirror, such as [rpmfind](https://rpmfind.net/) and make sure the system is Fedora 43 and that the arch is `x86_64`, and search for the package you want.
+
+3. Fetch the rpm
+Instead of clicking the url of your rpm package, you should right click and choose "Copy link address".
+Then, in the terminal, type (or copy and paste) the following:
+```sh
+curl (your rpm url here)  -O
+
+```
+For this example, I am using `nano`.
+After running the command, it should output this:
+```sh
+バカ(admin)/$ curl https://rpmfind.net/linux/fedora/linux/releases/43/Everything/x86_64/os/Packages/n/nano-8.5-2.fc43.x86_64.rpm -O
+curl: applet not found
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  710k  100  710k    0     0   367k      0  0:00:01  0:00:01 --:--:--  373k
+バカ(admin)/$
+```
+
+The `curl: applet not found` just means it checked `busybox` first.
+
+4. Install using RPM 
+To check what the file is called, just type `ls`.
+
+```sh
+バカ(admin)/$ ls
+afs                         lib64                       run
+bin                         media                       sbin
+boot                        mnt                         srv
+dev                         nano-8.5-2.fc43.x86_64.rpm  sys
+etc                         opt                         tmp
+home                        proc                        usr
+lib                         root                        var
+バカ(admin)/$
+```
+
+`nano-8.5-2.fc43.x86_64.rpm` is the rpm I will install.
+
+Now, to install your rpm, run the following:
+
+```sh
+rpm -i (filename).rpm
+```
+This will output
+```
+バカ(admin)/$ rpm -i  nano-8.5-2.fc43.x86_64.rpm
+rpm: no gzip/bzip2/xz magic
+```
+You can now run your command.
 
 ## Licence
 MIT
