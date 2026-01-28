@@ -4,49 +4,61 @@ use rustyline::Editor;
 
 use std::collections::HashMap;
 use std::env;
-use std::process::{Command, Stdio};
+
+mod pipes;
+use pipes::run_pipeline;
 
 fn run_command(cmd: &str, args: &[&str], busybox_path: &str, admin_mode: bool) {
-    // Always try BusyBox first
-    let busybox_status = Command::new(busybox_path)
+    let status = std::process::Command::new(busybox_path)
         .arg(cmd)
         .args(args)
-        .stdin(Stdio::inherit())
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
+        .stdin(std::process::Stdio::inherit())
+        .stdout(std::process::Stdio::inherit())
+        .stderr(std::process::Stdio::inherit())
         .status();
 
-    match busybox_status {
-        Ok(s) if s.success() => return, // ran successfully via BusyBox
+    match status {
+        Ok(s) if s.success() => return,
         _ => {
             if admin_mode {
-                // Admin mode: fallback to PATH binaries
-                let path_status = Command::new(cmd)
+                if let Err(e) = std::process::Command::new(cmd)
                     .args(args)
-                    .stdin(Stdio::inherit())
-                    .stdout(Stdio::inherit())
-                    .stderr(Stdio::inherit())
-                    .status();
-
-                if let Err(e) = path_status {
-                    eprintln!("bakaos(admin): {}: command not found or failed ({})", cmd, e);
+                    .stdin(std::process::Stdio::inherit())
+                    .stdout(std::process::Stdio::inherit())
+                    .stderr(std::process::Stdio::inherit())
+                    .status()
+                {
+                    eprintln!("bakaos(admin): {}: command not found ({})", cmd, e);
                 }
             } else {
-                // Not admin: BusyBox failed, don't run PATH
                 eprintln!("bakaos: {}: applet not found in BusyBox", cmd);
             }
         }
     }
 }
 
+/// Expand aliases and return Vec<String>
+fn expand_alias(cmd_parts: Vec<&str>, aliases: &HashMap<String, String>) -> Vec<String> {
+    if cmd_parts.is_empty() {
+        return vec![];
+    }
+    let cmd = cmd_parts[0];
+    if let Some(expanded) = aliases.get(cmd) {
+        let mut expanded_parts: Vec<String> =
+            expanded.split_whitespace().map(|s| s.to_string()).collect();
+        expanded_parts.extend(cmd_parts[1..].iter().map(|s| s.to_string()));
+        expanded_parts
+    } else {
+        cmd_parts.iter().map(|s| s.to_string()).collect()
+    }
+}
+
 fn main() {
     let busybox_path = "/usr/bin/busybox";
-
     let mut aliases: HashMap<String, String> = HashMap::new();
     aliases.insert("ll".into(), "ls -al".into());
-    aliases.insert("help".into(), busybox_path.into()); // help runs BusyBox
+    aliases.insert("help".into(), busybox_path.into());
 
-    // Admin mode flag
     let mut admin_mode = false;
 
     println!("\x1b[1;32mバカOS  (bakashell)\x1b[0m");
@@ -57,7 +69,6 @@ fn main() {
 
     let mut rl: Editor<(), DefaultHistory> =
         Editor::new().expect("failed to create editor");
-
     let _ = rl.load_history(".bakaos_history");
 
     loop {
@@ -74,49 +85,48 @@ fn main() {
                 if line.is_empty() {
                     continue;
                 }
-
                 rl.add_history_entry(line).ok();
 
-                let parts: Vec<&str> = line.split_whitespace().collect();
-                let mut cmd = parts[0];
-                let mut args: Vec<&str> = parts[1..].to_vec();
-
-                // Builtins
-                match cmd {
-                    "exit" => break,
-                    "cd" => {
-                        let target = args.get(0).copied().unwrap_or("/");
-                        if let Err(e) = env::set_current_dir(target) {
-                            eprintln!("bakaos: cd: {}", e);
-                        }
-                        continue;
+                if line == "exit" {
+                    break;
+                } else if line.starts_with("cd") {
+                    let args: Vec<&str> = line.split_whitespace().collect();
+                    let target = args.get(1).copied().unwrap_or("/");
+                    if let Err(e) = env::set_current_dir(target) {
+                        eprintln!("bakaos: cd: {}", e);
                     }
-                    "alias" => {
-                        for (k, v) in &aliases {
-                            println!("alias {}='{}'", k, v);
-                        }
-                        continue;
+                    continue;
+                } else if line == "alias" {
+                    for (k, v) in &aliases {
+                        println!("alias {}='{}'", k, v);
                     }
-                    "admin" => {
-                        admin_mode = !admin_mode;
-                        println!(
-                            "Admin mode {}",
-                            if admin_mode { "enabled" } else { "disabled" }
-                        );
-                        continue;
-                    }
-                    _ => {}
+                    continue;
+                } else if line == "admin" {
+                    admin_mode = !admin_mode;
+                    println!(
+                        "Admin mode {}",
+                        if admin_mode { "enabled" } else { "disabled" }
+                    );
+                    continue;
                 }
 
-                // Alias expansion
-                if let Some(expanded) = aliases.get(cmd) {
-                    let expanded_parts: Vec<&str> = expanded.split_whitespace().collect();
-                    cmd = expanded_parts[0];
-                    args.splice(0..0, expanded_parts[1..].iter().copied());
-                }
+                if line.contains('|') {
+                    let pipeline: Vec<Vec<String>> = line
+                        .split('|')
+                        .map(|cmd| {
+                            let parts: Vec<&str> = cmd.trim().split_whitespace().collect();
+                            expand_alias(parts, &aliases)
+                        })
+                        .collect();
 
-                // Execute command
-                run_command(cmd, &args, busybox_path, admin_mode);
+                    run_pipeline(pipeline, busybox_path, admin_mode);
+                } else {
+                    let parts: Vec<&str> = line.split_whitespace().collect();
+                    let parts = expand_alias(parts, &aliases);
+                    let cmd = &parts[0];
+                    let args: Vec<&str> = parts[1..].iter().map(|s| s.as_str()).collect();
+                    run_command(cmd, &args, busybox_path, admin_mode);
+                }
             }
 
             Err(ReadlineError::Interrupted) => {
