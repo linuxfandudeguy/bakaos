@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: MIT
+
+# Rust source files
+*.rs diff=rust
+
+# Makefiles
+Makefile diff=make
+*.mk diff=make
+
+# Dockerfiles
+Dockerfile diff=dockerfile
+*.dockerfile diff=dockerfile
+
+# Optional: shell scripts (if you have any)
+*.sh diff=sh

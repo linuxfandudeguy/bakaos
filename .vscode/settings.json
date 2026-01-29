@@ -1,0 +1,27 @@
+{
+    "rust-analyzer.cargo.autoreload": true,
+    "rust-analyzer.check.command": "clippy",
+    "files.exclude": {
+        "target": true,
+        ".vscode": false
+    },
+    "terminal.integrated.defaultProfile.linux": "bash",
+
+    "makefile.makePath": "make",
+    "makefile.makefilePath": "${workspaceFolder}/Makefile",
+
+    "makefile.configurations": [
+        {
+            "name": "Default",
+            "makeArgs": []
+        }
+    ],
+
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "${workspaceFolder}",
+            "binaryPath": "${workspaceFolder}/path/to/your/executable",
+            "binaryArgs": []
+        }
+    ]
+}
