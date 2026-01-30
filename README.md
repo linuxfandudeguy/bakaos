@@ -2,6 +2,8 @@
 
 バカOS is a Docker based operating system running on Fedora 43, with utils from `busybox`.
 
+> not to be confused with https://github.com/caiyih/bakaos
+
 > note: admin mode is more like advanced mode 
 
 ## Installation
