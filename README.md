@@ -16,7 +16,7 @@ Requirements:
 1. Clone the repo
 
 ```sh
-git clone https://github.com/linuxfandudeguy/bakaos
+git clone https://github.com/linuxfandudeguy/bakaos.git
 ```
 2. Build the shell and container and pretty much start the OS
 
