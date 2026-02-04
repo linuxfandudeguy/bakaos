@@ -1,4 +1,7 @@
 # バカOS
+![Dynamic TOML Badge](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2Flinuxfandudeguy%2Fbakaos%2Frefs%2Fheads%2Fmaster%2FCargo.toml&query=%24.package.version&logo=rust&logoColor=white&label=cargo&color=CE422B)
+![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+)
 
 バカOS is a Docker based operating system running on Fedora 43, with utils from `busybox`.
 
