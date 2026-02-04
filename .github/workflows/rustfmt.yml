@@ -1,4 +1,4 @@
-name: Rustfmt Auto-Fix
+name: fmt
 
 on:
   push:
@@ -13,27 +13,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout repo with push access
+      # Step 1: Checkout repository with push access
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          persist-credentials: true # needed for pushing
+          persist-credentials: true # needed for pushing commits
 
-      # Step 2: Set up Rust 1.93.0
-      - name: Set up Rust
-        uses: actions-rust/setup-rust@v2
+      # Step 2: Set up Rust toolchain and rustfmt
+      - name: Set up Rust and rustfmt
+        uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          rust-version: 1.93.0
+          toolchain: 1.93.0
+          components: rustfmt
 
-      # Step 3: Install rustfmt component
-      - name: Add rustfmt
-        run: rustup component add rustfmt
-
-      # Step 4: Run cargo fmt to auto-format code
+      # Step 3: Run cargo fmt to auto-format code
       - name: Run cargo fmt
         run: cargo fmt
 
-      # Step 5: Commit and push any changes
+      # Step 4: Commit and push any formatting changes
       - name: Commit formatted code
         run: |
           git config user.name "github-actions[bot]"
