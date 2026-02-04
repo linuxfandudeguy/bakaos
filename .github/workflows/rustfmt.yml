@@ -1,0 +1,28 @@
+name: rustfmt
+# Trigger on pushes, pull requests, and daily schedule
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  schedule:
+    - cron: "0 0 * * *" # every day at 00:00 UTC
+
+jobs:
+  rustfmt:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout repository with push permission
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true # needed to push commits
+
+      # Step 2: Auto-fix Rust code formatting
+      - name: Auto-fix Rust code formatting
+        uses: actions-rust-lang/rustfmt@v1.1.2
+        with:
+          check: false        # allow it to modify files
+          commit: true        # commit changes
+          commit_message: "chore: auto-format Rust code with rustfmt"
