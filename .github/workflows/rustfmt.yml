@@ -1,5 +1,4 @@
 name: rustfmt
-# Trigger on pushes, pull requests, and daily schedule
 on:
   push:
     branches: [ main, master ]
@@ -13,16 +12,33 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout repository with push permission
+      # Step 1: Checkout repo with push access
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          persist-credentials: true # needed to push commits
+          persist-credentials: true # needed for pushing
 
-      # Step 2: Auto-fix Rust code formatting
-      - name: Auto-fix Rust code formatting
-        uses: actions-rust-lang/rustfmt@v1.1.2
+      # Step 2: Set up Rust toolchain
+      - name: Set up Rust
+        uses: actions/setup-rust@v2
         with:
-          check: false        # allow it to modify files
-          commit: true        # commit changes
-          commit_message: "chore: auto-format Rust code with rustfmt"
+          rust-version: 1.93.0
+
+      # Step 3: Install rustfmt component
+      - name: Add rustfmt
+        run: rustup component add rustfmt
+
+      # Step 4: Run cargo fmt to auto-format code
+      - name: Run cargo fmt
+        run: cargo fmt
+
+      # Step 5: Commit and push any changes
+      - name: Commit formatted code
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git diff --cached --quiet || git commit -m "chore: auto-format Rust code with cargo fmt"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
