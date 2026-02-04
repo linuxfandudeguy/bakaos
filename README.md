@@ -13,8 +13,8 @@
 
 ```sh
 docker pull ghcr.io/linuxfandudeguy/bakaos:master
-sudo docker run -it --rm bakaos
-```
+sudo docker run -it --rm ghcr.io/linuxfandudeguy/bakaos:master
+ ```
 Requirements:
 - `cargo`  (`1.93.0 (083ac5135 2025-12-15)` is preferred)
 - `rustc` (`1.93.0 (254b59607 2026-01-19)` is preferred)
