@@ -1,4 +1,5 @@
-name: rustfmt
+name: Rustfmt Auto-Fix
+
 on:
   push:
     branches: [ main, master ]
@@ -18,9 +19,9 @@ jobs:
         with:
           persist-credentials: true # needed for pushing
 
-      # Step 2: Set up Rust toolchain
+      # Step 2: Set up Rust 1.93.0
       - name: Set up Rust
-        uses: actions/setup-rust@v2
+        uses: actions-rust/setup-rust@v2
         with:
           rust-version: 1.93.0
 
