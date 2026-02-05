@@ -1,6 +1,18 @@
 # バカOS
 ![Dynamic TOML Badge](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2Flinuxfandudeguy%2Fbakaos%2Frefs%2Fheads%2Fmaster%2FCargo.toml&query=%24.package.version&logo=rust&logoColor=white&label=cargo&color=CE422B)
 ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=flat&logo=docker&logoColor=white)
+![BakaOS Latest Tag](https://ghcr-badge.egpl.dev/linuxfandudeguy/bakaos/latest_tag?color=%2344cc11&ignore=latest&label=version&trim=)
+
+![example workflow](https://github.com/linuxfandudeguy/bakaos/actions/workflows/docker-publish.yml/badge.svg)
+
+![example workflow](https://github.com/linuxfandudeguy/bakaos/actions/workflows/fmt.yml/badge.svg)
+
+![BakaOS Image Size](https://ghcr-badge.egpl.dev/linuxfandudeguy/bakaos/size?color=%2344cc11&tag=sha256-b1208bc0d14f360d618dd8a06d5dde9e0bff77b2877bd241312344eb648a7483&label=image+size&trim=)
+
+![stars](https://img.shields.io/github/stars/linuxfandudeguy/bakaos
+)
+
+![GitHub commit activity](https://img.shields.io/github/commit-activity/t/linuxfandudeguy/bakaos)
 
 バカOS is a Docker based operating system running on Fedora 43, with utils from `busybox`.
 
