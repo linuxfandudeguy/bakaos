@@ -66,22 +66,28 @@ fn main() {
     aliases.insert("help".into(), busybox_path.into());
 
     let mut admin_mode = false;
+    let mut sh_mode = false;
 
     println!("\x1b[1;32mバカOS  (bakashell)\x1b[0m");
     println!("BusyBox: {}", busybox_path);
     println!("Type 'help' to list commands (BusyBox).");
     println!("Type 'exit' to quit.");
-    println!("Type 'admin' to toggle admin mode.\n");
+    println!("Type 'admin' to toggle admin mode.");
+    println!("Type 'sh' to enter POSIX compatibility mode (sh-5.3).\n");
 
     let mut rl: Editor<(), DefaultHistory> = Editor::new().expect("failed to create editor");
     let _ = rl.load_history(".bakaos_history");
 
     loop {
         let cwd = env::current_dir().unwrap_or_else(|_| "/".into());
-        let prompt = if admin_mode {
-            format!("\x1b[1;31mバカ(admin){}$ \x1b[0m", cwd.display())
+
+        // Choose prompt color based on mode
+        let prompt = if sh_mode {
+            format!("\x1b[1;35mバカ(sh-5.3){}$ \x1b[0m", cwd.display()) // purple
+        } else if admin_mode {
+            format!("\x1b[1;31mバカ(admin){}$ \x1b[0m", cwd.display()) // red
         } else {
-            format!("\x1b[1;34mバカ:{}$ \x1b[0m", cwd.display())
+            format!("\x1b[1;34mバカ:{}$ \x1b[0m", cwd.display()) // blue
         };
 
         match rl.readline(&prompt) {
@@ -92,7 +98,36 @@ fn main() {
                 }
                 rl.add_history_entry(line).ok();
 
-                // Builtins
+                // Toggle sh mode
+                if line == "sh" && !sh_mode {
+                    sh_mode = true;
+                    println!("Entering real shell mode (sh-5.3). Type 'exit' to return.");
+                    continue;
+                }
+
+                // In sh_mode, all commands go to /bin/sh -c
+                if sh_mode {
+                    if line == "exit" {
+                        sh_mode = false;
+                        println!("Returning to BakaShell.");
+                        continue;
+                    }
+
+                    let status = std::process::Command::new("/bin/sh")
+                        .arg("-c")
+                        .arg(line)
+                        .stdin(std::process::Stdio::inherit())
+                        .stdout(std::process::Stdio::inherit())
+                        .stderr(std::process::Stdio::inherit())
+                        .status();
+
+                    if let Err(e) = status {
+                        eprintln!("sh: command failed: {}", e);
+                    }
+                    continue;
+                }
+
+                // --- BakaShell builtins ---
                 if line == "exit" {
                     break;
                 } else if line.starts_with("cd") {
@@ -115,9 +150,8 @@ fn main() {
                     );
                     continue;
                 } else if line == "clear" {
-                    // Clear screen
-                    print!("\x1B[2J\x1B[H"); // clear screen + move cursor to top-left
-                    io::stdout().flush().unwrap(); // flush to terminal
+                    print!("\x1B[2J\x1B[H");
+                    io::stdout().flush().unwrap();
                     continue;
                 }
 
