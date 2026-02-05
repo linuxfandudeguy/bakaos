@@ -73,8 +73,7 @@ fn main() {
     println!("Type 'exit' to quit.");
     println!("Type 'admin' to toggle admin mode.\n");
 
-    let mut rl: Editor<(), DefaultHistory> =
-        Editor::new().expect("failed to create editor");
+    let mut rl: Editor<(), DefaultHistory> = Editor::new().expect("failed to create editor");
     let _ = rl.load_history(".bakaos_history");
 
     loop {
@@ -117,8 +116,8 @@ fn main() {
                     continue;
                 } else if line == "clear" {
                     // Clear screen
-                   print!("\x1B[2J\x1B[H"); // clear screen + move cursor to top-left
-                   io::stdout().flush().unwrap(); // flush to terminal
+                    print!("\x1B[2J\x1B[H"); // clear screen + move cursor to top-left
+                    io::stdout().flush().unwrap(); // flush to terminal
                     continue;
                 }
 

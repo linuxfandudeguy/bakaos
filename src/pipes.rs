@@ -38,4 +38,3 @@ pub fn run_pipeline(commands: Vec<Vec<String>>, busybox_path: &str, _admin_mode:
         }
     }
 }
-
