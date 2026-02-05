@@ -1,9 +1,9 @@
 use rustyline::completion::{Completer, Pair};
 use rustyline::highlight::{Highlighter, MatchingBracketHighlighter};
 use rustyline::hint::{Hinter, HistoryHinter};
-use rustyline::validate::{Validator, ValidationContext, ValidationResult};
-use rustyline::{Context, Helper};
+use rustyline::validate::{ValidationContext, ValidationResult, Validator};
 use rustyline::CompletionType;
+use rustyline::{Context, Helper};
 
 use std::collections::HashMap;
 use std::path::Path;

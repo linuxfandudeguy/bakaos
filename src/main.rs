@@ -46,10 +46,13 @@ fn run_command(cmd: &str, args: &[&str], busybox_path: &str, admin_mode: bool) {
 
 /// Expand aliases
 fn expand_alias(cmd_parts: Vec<&str>, aliases: &HashMap<String, String>) -> Vec<String> {
-    if cmd_parts.is_empty() { return vec![]; }
+    if cmd_parts.is_empty() {
+        return vec![];
+    }
     let cmd = cmd_parts[0];
     if let Some(expanded) = aliases.get(cmd) {
-        let mut expanded_parts: Vec<String> = expanded.split_whitespace().map(|s| s.to_string()).collect();
+        let mut expanded_parts: Vec<String> =
+            expanded.split_whitespace().map(|s| s.to_string()).collect();
         expanded_parts.extend(cmd_parts[1..].iter().map(|s| s.to_string()));
         expanded_parts
     } else {
@@ -75,12 +78,17 @@ fn main() {
     println!("Type 'sh' to enter POSIX compatibility mode (sh-5.3).\n");
 
     let commands = vec![
-        "cd".into(), "exit".into(), "alias".into(),
-        "admin".into(), "clear".into(), "sh".into()
+        "cd".into(),
+        "exit".into(),
+        "alias".into(),
+        "admin".into(),
+        "clear".into(),
+        "sh".into(),
     ];
     let helper = BakaHelper::new(commands, aliases.clone());
 
-    let mut rl: Editor<BakaHelper, DefaultHistory> = Editor::new().expect("failed to create editor");
+    let mut rl: Editor<BakaHelper, DefaultHistory> =
+        Editor::new().expect("failed to create editor");
     rl.set_helper(Some(helper));
     let _ = rl.load_history(".bakaos_history");
 
@@ -97,7 +105,9 @@ fn main() {
         match rl.readline(&prompt) {
             Ok(line) => {
                 let line = line.trim();
-                if line.is_empty() { continue; }
+                if line.is_empty() {
+                    continue;
+                }
                 rl.add_history_entry(line).ok();
 
                 // --- SH mode ---
@@ -128,28 +138,30 @@ fn main() {
                 }
 
                 // --- BakaShell builtins ---
-                if line == "exit" { break; }
-                else if line.starts_with("cd") {
+                if line == "exit" {
+                    break;
+                } else if line.starts_with("cd") {
                     let args: Vec<&str> = line.split_whitespace().collect();
                     let target = args.get(1).copied().unwrap_or("/");
                     if let Err(e) = env::set_current_dir(target) {
                         eprintln!("bakaos: cd: {}", e);
                     }
                     continue;
-                }
-                else if line == "alias" {
+                } else if line == "alias" {
                     for (k, v) in &aliases {
                         println!("alias {}='{}'", k, v);
                     }
                     continue;
-                }
-                else if line == "admin" {
+                } else if line == "admin" {
                     admin_mode = !admin_mode;
-                    println!("Admin mode {}", if admin_mode {"enabled"} else {"disabled"});
+                    println!(
+                        "Admin mode {}",
+                        if admin_mode { "enabled" } else { "disabled" }
+                    );
                     continue;
-                }
-                else if line == "clear" {
-                    print!("\x1B[2J\x1B[H"); io::stdout().flush().unwrap();
+                } else if line == "clear" {
+                    print!("\x1B[2J\x1B[H");
+                    io::stdout().flush().unwrap();
                     continue;
                 }
 
@@ -160,7 +172,8 @@ fn main() {
                         .map(|cmd| {
                             let parts: Vec<&str> = cmd.trim().split_whitespace().collect();
                             let parts = expand_alias(parts, &aliases);
-                            let parts: Vec<String> = parts.into_iter().map(|s| s.to_string()).collect();
+                            let parts: Vec<String> =
+                                parts.into_iter().map(|s| s.to_string()).collect();
                             expand_globs(parts)
                         })
                         .collect();
