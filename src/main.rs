@@ -80,7 +80,7 @@ fn main() {
     println!("Type 'exit' to quit.");
     println!("Type 'admin' to toggle admin mode.");
     println!("Press \"CTRL+L\" to clear the terminal");
-    println!("Type 'sh' to enter POSIX compatibility mode (sh-5.3).\n");
+    println!("Type 'sh' to enter shell mode (sh-5.3).\n");
 
     let commands = vec![
         "cd".into(),
