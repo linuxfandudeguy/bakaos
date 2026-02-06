@@ -15,6 +15,7 @@ use globb::expand_globs;
 mod readline;
 use readline::BakaHelper;
 
+/// Run a command via BusyBox first, fallback to system command if admin_mode
 fn run_command(cmd: &str, args: &[&str], busybox_path: &str, admin_mode: bool) {
     let status = std::process::Command::new(busybox_path)
         .arg(cmd)
@@ -44,7 +45,7 @@ fn run_command(cmd: &str, args: &[&str], busybox_path: &str, admin_mode: bool) {
     }
 }
 
-/// Expand aliases
+/// Expand aliases recursively
 fn expand_alias(cmd_parts: Vec<&str>, aliases: &HashMap<String, String>) -> Vec<String> {
     if cmd_parts.is_empty() {
         return vec![];
@@ -54,7 +55,10 @@ fn expand_alias(cmd_parts: Vec<&str>, aliases: &HashMap<String, String>) -> Vec<
         let mut expanded_parts: Vec<String> =
             expanded.split_whitespace().map(|s| s.to_string()).collect();
         expanded_parts.extend(cmd_parts[1..].iter().map(|s| s.to_string()));
-        expanded_parts
+
+        // Check recursive expansion
+        let expanded_parts_str: Vec<&str> = expanded_parts.iter().map(|s| s.as_str()).collect();
+        return expand_alias(expanded_parts_str, aliases);
     } else {
         cmd_parts.iter().map(|s| s.to_string()).collect()
     }
@@ -62,6 +66,7 @@ fn expand_alias(cmd_parts: Vec<&str>, aliases: &HashMap<String, String>) -> Vec<
 
 fn main() {
     let busybox_path = "/usr/bin/busybox";
+
     let mut aliases: HashMap<String, String> = HashMap::new();
     aliases.insert("ll".into(), "ls -al".into());
     aliases.insert("help".into(), busybox_path.into());
@@ -69,7 +74,7 @@ fn main() {
     let mut admin_mode = false;
     let mut sh_mode = false;
 
-    println!("\x1b[1;32mバカOS  (bakashell)\x1b[0m");
+    println!("\x1b[1;32mヽ(#`Д´)ﾉ バカOS (bakashell)\x1b[0m");
     println!("BusyBox: {}", busybox_path);
     println!("Type 'help' to list commands (BusyBox).");
     println!("Type 'exit' to quit.");
@@ -94,12 +99,23 @@ fn main() {
 
     loop {
         let cwd = env::current_dir().unwrap_or_else(|_| "/".into());
+
+        // --- Stylish バカ prompt ---
         let prompt = if sh_mode {
-            format!("\x1b[1;35mバカ(sh-5.3){}$ \x1b[0m", cwd.display())
+            format!(
+                "\x1b[1;35mヽ(°□° )ノ バカ(sh-5.3) [{}]$ \x1b[0m",
+                cwd.display()
+            )
         } else if admin_mode {
-            format!("\x1b[1;31mバカ(admin){}$ \x1b[0m", cwd.display())
+            format!(
+                "\x1b[1;31m(；￣Д￣) バカ(admin) [{}]# \x1b[0m",
+                cwd.display()
+            )
         } else {
-            format!("\x1b[1;34mバカ:{}$ \x1b[0m", cwd.display())
+            format!(
+                "\x1b[1;34mヽ(#`Д´)ﾉ バカ [{}]$ \x1b[0m",
+                cwd.display()
+            )
         };
 
         match rl.readline(&prompt) {
@@ -113,14 +129,14 @@ fn main() {
                 // --- SH mode ---
                 if line == "sh" && !sh_mode {
                     sh_mode = true;
-                    println!("Entering shell mode (sh-5.3). Type 'exit' to return.");
+                    println!("ヽ(；￣Д￣)ノ Entering shell mode (sh-5.3). Type 'exit' to return.");
                     continue;
                 }
 
                 if sh_mode {
                     if line == "exit" {
                         sh_mode = false;
-                        println!("Returning to BakaShell.");
+                        println!("(￣Д￣)ﾉ Returning to バカShell.");
                         continue;
                     }
                     let status = std::process::Command::new("/bin/sh")
@@ -137,8 +153,9 @@ fn main() {
                     continue;
                 }
 
-                // --- BakaShell builtins ---
+                // --- Builtins ---
                 if line == "exit" {
+                    println!("ヽ(´Д｀ヽ) Bye-bye!");
                     break;
                 } else if line.starts_with("cd") {
                     let args: Vec<&str> = line.split_whitespace().collect();
@@ -147,15 +164,31 @@ fn main() {
                         eprintln!("bakaos: cd: {}", e);
                     }
                     continue;
-                } else if line == "alias" {
-                    for (k, v) in &aliases {
-                        println!("alias {}='{}'", k, v);
+                } else if line.starts_with("alias") {
+                    let args: Vec<&str> = line.split_whitespace().collect();
+
+                    if args.len() == 1 {
+                        println!("(*≧ω≦) Current aliases:");
+                        for (k, v) in &aliases {
+                            println!("alias {}='{}'", k, v);
+                        }
+                    } else {
+                        // alias name="command"
+                        for arg in &args[1..] {
+                            if let Some((name, value)) = arg.split_once('=') {
+                                let value = value.trim_matches('"');
+                                aliases.insert(name.to_string(), value.to_string());
+                                println!("Alias created: {}='{}'", name, value);
+                            } else {
+                                eprintln!("bakaos: invalid alias format: {}", arg);
+                            }
+                        }
                     }
                     continue;
                 } else if line == "admin" {
                     admin_mode = !admin_mode;
                     println!(
-                        "Admin mode {}",
+                        "(¬‿¬) Admin mode {}",
                         if admin_mode { "enabled" } else { "disabled" }
                     );
                     continue;
@@ -165,7 +198,7 @@ fn main() {
                     continue;
                 }
 
-                // --- Pipeline support ---
+                // --- Pipeline or single command ---
                 if line.contains('|') {
                     let pipeline: Vec<Vec<String>> = line
                         .split('|')
@@ -179,19 +212,31 @@ fn main() {
                         .collect();
                     run_pipeline(pipeline, busybox_path, admin_mode);
                 } else {
-                    // Single command
                     let parts: Vec<&str> = line.split_whitespace().collect();
                     let parts = expand_alias(parts, &aliases);
                     let mut parts: Vec<String> = parts.into_iter().map(|s| s.to_string()).collect();
                     parts = expand_globs(parts);
 
+                    if parts.is_empty() {
+                        continue;
+                    }
+
                     let cmd = &parts[0];
                     let args: Vec<&str> = parts[1..].iter().map(|s| s.as_str()).collect();
-                    run_command(cmd, &args, busybox_path, admin_mode);
+
+                    // Run aliases first, then real commands
+                    if aliases.contains_key(cmd) {
+                        let expanded: Vec<String> = expand_alias(vec![cmd], &aliases);
+                        let cmd = &expanded[0];
+                        let args: Vec<&str> = expanded[1..].iter().map(|s| s.as_str()).collect();
+                        run_command(cmd, &args, busybox_path, admin_mode);
+                    } else {
+                        run_command(cmd, &args, busybox_path, admin_mode);
+                    }
                 }
             }
 
-            Err(ReadlineError::Interrupted) => println!("^C"),
+            Err(ReadlineError::Interrupted) => println!("^C ヽ(｀⌒´)ノ"),
             Err(ReadlineError::Eof) => break,
             Err(err) => {
                 eprintln!("bakaos: error: {:?}", err);
