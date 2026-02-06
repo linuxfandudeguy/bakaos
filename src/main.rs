@@ -112,10 +112,7 @@ fn main() {
                 cwd.display()
             )
         } else {
-            format!(
-                "\x1b[1;34mヽ(#`Д´)ﾉ バカ [{}]$ \x1b[0m",
-                cwd.display()
-            )
+            format!("\x1b[1;34mヽ(#`Д´)ﾉ バカ [{}]$ \x1b[0m", cwd.display())
         };
 
         match rl.readline(&prompt) {
