@@ -93,12 +93,12 @@ curl (your rpm url here)  -O
 For this example, I am using `nano`.
 After running the command, it should output this:
 ```sh
-バカ(admin)/$ curl https://rpmfind.net/linux/fedora/linux/releases/43/Everything/x86_64/os/Packages/n/nano-8.5-2.fc43.x86_64.rpm -O
+(；￣Д￣) バカ(admin) [/]#  curl https://rpmfind.net/linux/fedora/linux/releases/43/Everything/x86_64/os/Packages/n/nano-8.5-2.fc43.x86_64.rpm -O
 curl: applet not found
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
 100  710k  100  710k    0     0   367k      0  0:00:01  0:00:01 --:--:--  373k
-バカ(admin)/$
+(；￣Д￣) バカ(admin) [/]# 
 ```
 
 The `curl: applet not found` just means it checked `busybox` first.
