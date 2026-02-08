@@ -75,9 +75,9 @@ To install any package, do the following:
 
 Run `admin` in the shell to follow these instructions, or else it wont work.
 ```sh
-バカ:/$ admin
+(；￣Д￣) バカ(admin) [/]#  admin
 Admin mode enabled
-バカ(admin)/$
+(；￣Д￣) バカ(admin) [/]# 
 ```
 2. Find the rpm for the package you want to install
 
@@ -107,7 +107,7 @@ The `curl: applet not found` just means it checked `busybox` first.
 To check what the file is called, just type `ls`.
 
 ```sh
-バカ(admin)/$ ls
+(；￣Д￣) バカ(admin) [/]#  ls
 afs                         lib64                       run
 bin                         media                       sbin
 boot                        mnt                         srv
@@ -115,7 +115,7 @@ dev                         nano-8.5-2.fc43.x86_64.rpm  sys
 etc                         opt                         tmp
 home                        proc                        usr
 lib                         root                        var
-バカ(admin)/$
+(；￣Д￣) バカ(admin) [/]# 
 ```
 
 `nano-8.5-2.fc43.x86_64.rpm` is the rpm I will install.
@@ -127,7 +127,7 @@ rpm -i (filename).rpm
 ```
 This will output
 ```
-バカ(admin)/$ rpm -i  nano-8.5-2.fc43.x86_64.rpm
+(；￣Д￣) バカ(admin) [/]#  rpm -i  nano-8.5-2.fc43.x86_64.rpm
 rpm: no gzip/bzip2/xz magic
 ```
 You can now run your command.
