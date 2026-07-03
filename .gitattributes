@@ -11,5 +11,3 @@ Makefile diff=make
 Dockerfile diff=dockerfile
 *.dockerfile diff=dockerfile
 
-# Optional: shell scripts (if you have any)
-*.sh diff=sh
